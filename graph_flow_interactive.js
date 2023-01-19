@@ -26,7 +26,7 @@ String.format = function() {
  
 // main 
 
-readTextFile("./sample0116.json", function(text){
+readTextFile("https://github.com/chengchichu/chengchichu.github.io/blob/master/sample0116.json", function(text){
     var data = JSON.parse(text);
     console.log(data);
  
