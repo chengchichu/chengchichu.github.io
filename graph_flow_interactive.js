@@ -143,7 +143,15 @@ function return_new_graph(data, trg_i){
 }
 
 
-const scale = 0.8;
+const width = window.innerWidth;
+const height = window.innerHeight;
+console.log(width)
+console.log(height)
+document.getElementById('graph').style.width = width-100+'px'
+document.getElementById('graph').style.height = height-100+'px'
+// console.log(document.getElementById('graph').style.width)
+
+const scale = 0.9;
 
 function attributer(datum, index, nodes) {
     var selection = d3.select(this);
