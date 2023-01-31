@@ -1,25 +1,32 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<!-- <style type="text/css" media="screen">
-    #editor {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        border: 1px solid lightgray;
+<!-- <style>
+    /* #graph {
+        /* Just an example */
+        height: 250px;
     }
+    #graph svg {
+        height: 300%;
+        width: 300%;
+    } */
 </style> -->
-<body>
-<script src="https://d3js.org/d3.v5.js"></script>
-<script src="https://unpkg.com/viz.js@1.8.0/viz.js" type="javascript/worker"></script>
-<script src="https://unpkg.com/d3-graphviz@2.1.0/build/d3-graphviz.min.js"></script>
-<div id="graph" style="text-align: center;"></div>
 
+<body>
+
+<script src="//d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+<script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
+
+
+<!-- <script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://unpkg.com/viz.js@1.8.0/viz.js" type="javascript/worker"></script>
+<script src="https://unpkg.com/d3-graphviz@2.1.0/build/d3-graphviz.min.js"></script> -->
+<!-- <div id="graph" style="text-align: center;"></div> -->
+<div id="graph" style="width: 2500px; height: 1500px; border: 1px solid black"></div>
 <input id="contentFile" type="file" accept="application/json" />
 
-<!-- <script type="module" src="./testjs.js"></script> -->
+
 <script src= ./graph_flow_interactive.js ></script>
 
 
