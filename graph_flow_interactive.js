@@ -142,7 +142,6 @@ function return_new_graph(data, trg_i){
     return [data, unode, dnode]
 }
 
-
 const width = window.innerWidth;
 const height = window.innerHeight;
 console.log(width)
@@ -240,8 +239,8 @@ document.getElementById('contentFile').onchange = function(evt) {
                 graphviz
                     .transition(function() {
                         return d3.transition()
-                            .delay(100)
-                            .duration(1000);
+                            .delay(10)
+                            .duration(100);
                     })
                     // .width(width)
                     // .height(height)
@@ -256,37 +255,50 @@ document.getElementById('contentFile').onchange = function(evt) {
 
             function interactive() {
 
-                nodes = d3.selectAll('.node,.edge');
-                nodes
-                    .on("click", function () {
-                        var title = d3.select(this).selectAll('title').text().trim();
-                        var text = d3.select(this).selectAll('text').text();
-                        var id = d3.select(this).attr('id');
-                        var class1 = d3.select(this).attr('class');
+
+                const searchInput = document.getElementById("searchbar");
+                const searchButton = document.getElementById("searchButton");
+    
+                // Next, we need to listen for the click event on the search button:
+                searchButton.addEventListener("click", handleSearch);
+    
+                // In the event handler function, we can get the value of the search input and log it to the console:
+                function handleSearch() {
+
+                    const searchTerm = searchInput.value;
+                    console.log(searchTerm);
+                    unode = []
+                    dnode = []
                     
-                        // var color = d3.select(this).style("background-color", "yellow");
+                    var current_nodes = []
+                    for (const key of Object.keys(data.nodes)) { 
+                        current_nodes.push(data.nodes[key].id)
+                    } 
+                    console.log(current_nodes)
 
-                        dotElement = title.replace('->',' -> ');
-                        console.log('Element id="%s" class="%s" title="%s" text="%s" dotElement="%s"', id, class1, title, text, dotElement);
-                        console.log('Finding and deleting references to %s "%s" from the DOT source', class1, dotElement);
-                        // console.log('%s',color)
-
-                        console.log(dotElement)
-                        out = return_new_graph(data, parseInt(dotElement))
+                    if (!searchTerm) {
+                        data = JSON.parse(event.target.result);
+                        console.log(searchTerm)
+                        render();
+                    } else if (!current_nodes.includes(parseInt(searchTerm))) {
+                      
+                        render();
+                        
+                    } else  {
+                        out = return_new_graph(data, parseInt(searchTerm))
                         data = out[0]
                         unode = out[1]
                         dnode = out[2]
-                        // console.log(new_graph_)
-                        // dotSrc = new_graph_.join('\n');
-                        render();
-                        // var svg1 = document.getElementById('svg');
-                        // console.log(svg1);
-                        // console.log('style', svg1.style.width + 'x' + svg1.style.height);
-                        // console.log('client', svg1.clientWidth + 'x' + svg1.clientHeight);
-                        // console.log('offset', svg1.offsetWidth + 'x' + svg1.offsetHeight);
-                    });
-            }
-            render(data);
+                        render();  
+                    
+                    }
+              
+                    // });
+            };
+        };
+            
+        // const initial_data = data
+        render(data);
 
         }; // reader.onload
         reader.readAsText(file);
