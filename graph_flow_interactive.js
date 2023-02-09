@@ -1,4 +1,7 @@
 
+  function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key].id === value);
+  }
 
 
 // string format function
@@ -12,20 +15,24 @@ String.format = function() {
  };
 
 // convert jobj data to DOT language graph
-function source_to_dot(data) {
+function source_to_dot(data, unode, dnode) {
     
     var node_default = String.format(`    node [ shape="{0}", style="{1}", fontname="{2}", margin="{3}", color="{4}"]`,"box","rounded","Lato","0.2","black")
     collected_node = []
     paresed_node = []
-    for (const key of Object.keys(data.nodes)) {     
-        if ((typeof unode !== 'undefined') && (unode.includes(parseInt(key)))) {
-            var node_i = String.format(`    {0} [ label="{1}", id="{2}", frontcolor="black", color="blue" ]`,key,data.nodes[key].id,"node_"+data.nodes[key].id)
-        } else if ((typeof dnode !== 'undefined') && (dnode.includes(parseInt(key))))  {
+    console.log(data)
+    for (const key of Object.keys(data.nodes)) {   
+        console.log(key)  
+        console.log(data.nodes[0])
+        console.log(unode)
+        if ((typeof unode !== 'undefined') && (unode.includes(data.nodes[key].id))) {
+            var node_i = String.format(`    {0} [ label="{1}", id="{2}", frontcolor="black", color="blue" ]`,data.nodes[key].id,data.nodes[key].id,"node_"+data.nodes[key].id)
+        } else if ((typeof dnode !== 'undefined') && (dnode.includes(data.nodes[key].id)))  {
         
-        var node_i = String.format(`    {0} [ label="{1}", id="{2}", frontcolor="black", color="green" ]`,key,data.nodes[key].id,"node_"+data.nodes[key].id)
+        var node_i = String.format(`    {0} [ label="{1}", id="{2}", frontcolor="black", color="green" ]`,data.nodes[key].id,data.nodes[key].id,"node_"+data.nodes[key].id)
     
         } else {
-        var node_i = String.format(`    {0} [ label="{1}", id="{2}", frontcolor="black", color="black" ]`,key,data.nodes[key].id,"node_"+data.nodes[key].id)
+        var node_i = String.format(`    {0} [ label="{1}", id="{2}", frontcolor="black", color="black" ]`,data.nodes[key].id,data.nodes[key].id,"node_"+data.nodes[key].id)
         }   
         paresed_node.push(node_i)
         collected_node.push(key)
@@ -55,6 +62,7 @@ function return_new_graph(data, trg_i){
     console.log(trg)
     var I = data 
     console.log(I)
+    console.log(I.nodes[0]['inBound'])
     var ukeys = []
     var unode = []
     do {
@@ -69,13 +77,26 @@ function return_new_graph(data, trg_i){
         }; 
         unode = unode.concat(node_matched)
         // console.log(node_matched)
+        // console.log(I.nodes[0].id)
+
+        // for (j=0; j<node_matched.length; j++) {
+
+        // var current_nodes = []
+        // for (const key of Object.keys(data.nodes)) { 
+        //     current_nodes.push(data.nodes[key].id)
+        // } 
+
         // remove if bound
         for (j=0; j<node_matched.length; j++) {
-            //  console.log(node_matched[j])
-            if (I.nodes[node_matched[j]]['inBound']){
+             console.log(node_matched[j])
+            idc = getKeyByValue(I.nodes, node_matched[j])
+            if (I.nodes[idc]['inBound']){
                 node_matched.splice(j,1)
             };
-        };
+        }
+
+        
+
         console.log(node_matched)
         // unode = unode.concat(node_matched)
         ukeys = ukeys.concat(new_key) 
@@ -103,11 +124,12 @@ function return_new_graph(data, trg_i){
         dnode = dnode.concat(node_matched)
         // remove if bound
         for (j=0; j<node_matched.length; j++) {
-            // console.log(node_matched)
-            if (I.nodes[node_matched[j]]['inBound']){
-                node_matched.splice(j,1)
-            };
-        };
+            console.log(node_matched[j])
+           idc = getKeyByValue(I.nodes, node_matched[j])
+           if (I.nodes[idc]['inBound']){
+               node_matched.splice(j,1)
+           };
+        }
         
         dkeys = dkeys.concat(new_key) 
         console.log(node_matched)
@@ -134,11 +156,13 @@ function return_new_graph(data, trg_i){
     };
     // remove node
     for (const key of Object.keys(data.nodes)) {     
-        if (!nodes_in.includes(parseInt(key))) {
+        if (!nodes_in.includes(data.nodes[key].id)) {
             delete data.nodes[key]
         };
     };
     
+    console.log(data)
+
     return [data, unode, dnode]
 }
 
@@ -201,38 +225,41 @@ document.getElementById('contentFile').onchange = function(evt) {
             // console.log('FILE CONTENT', event.target.result);
             // text = event.target.result
             var data = JSON.parse(event.target.result);
+            // const init_data = data
+
             console.log(data);
    
             // determine boundary node in jobj
             //   console.log(data.links)
             // var trg_i = 3
-            var in_source = []
-            var in_target = []
-            for (const key of Object.keys(data.links)) {
-                in_source.push(data.links[key].source)
-                in_target.push(data.links[key].target)
-            }; 
 
-            for (const key of Object.keys(data.nodes)) {
-                var cnt = in_source.filter(x => x === data.nodes[key].id).length
-                var cnt2 = in_target.filter(x => x === data.nodes[key].id).length
-            //    target_cnt_table.push(cnt)
-            //    console.log(cnt)
-            //    console.log(cnt2)
-            //    console.log(data.nodes[key])
-            //    newData = Object.assign(data.nodes, {key: { inBound: (cnt==0)||(cnt2==0) }} )
-                data.nodes[key]['inBound'] = (cnt==0)||(cnt2==0)
-            }; 
+            function get_boundnode(data) {
+                var in_source = []
+                var in_target = []
+                for (const key of Object.keys(data.links)) {
+                    in_source.push(data.links[key].source)
+                    in_target.push(data.links[key].target)
+                }; 
 
-            var margin = 20; // to avoid scrollbars
-            var width = window.innerWidth - margin;
-            var height = window.innerHeight - margin;
+                for (const key of Object.keys(data.nodes)) {
+                    var cnt = in_source.filter(x => x === data.nodes[key].id).length
+                    var cnt2 = in_target.filter(x => x === data.nodes[key].id).length
+                    data.nodes[key]['inBound'] = (cnt==0)||(cnt2==0)
+                }; 
+                return data
+            };
+            data = get_boundnode(data)
+
+            console.log(data.nodes[0]['inBound'])
+            // var margin = 20; // to avoid scrollbars
+            // var width = window.innerWidth - margin;
+            // var height = window.innerHeight - margin;
 
             // graphviz with d3
             var graphviz = d3.select("#graph").graphviz();
-
-            function render() {           
-                dotSrc = source_to_dot(data)
+            
+            function render(data, unode, dnode) {           
+                dotSrc = source_to_dot(data, unode, dnode)
                 console.log('DOT source =', dotSrc);
                 // dotSrcLines = dotSrc.split('\n');
 
@@ -248,7 +275,7 @@ document.getElementById('contentFile').onchange = function(evt) {
                     // .scale(.8)
                     .attributer(attributer)
                     .renderDot(dotSrc)
-                    .on("end", interactive);
+                    // .on("end", interactive);
 
                 // console.log(graphviz.data())    
             }
@@ -276,20 +303,43 @@ document.getElementById('contentFile').onchange = function(evt) {
                     } 
                     console.log(current_nodes)
 
+                    data = JSON.parse(event.target.result);
+                    // data = get_boundnode(data)
+                    var in_source = []
+                    var in_target = []
+                    for (const key of Object.keys(data.links)) {
+                        in_source.push(data.links[key].source)
+                        in_target.push(data.links[key].target)
+                    }; 
+    
+                    for (const key of Object.keys(data.nodes)) {
+                        var cnt = in_source.filter(x => x === data.nodes[key].id).length
+                        var cnt2 = in_target.filter(x => x === data.nodes[key].id).length
+                        data.nodes[key]['inBound'] = (cnt==0)||(cnt2==0)
+                    }; 
+
+                    // console.log(data.links[0])
+
                     if (!searchTerm) {
-                        data = JSON.parse(event.target.result);
+                        // data = JSON.parse(event.target.result);
+                        // data = init_data
                         console.log(searchTerm)
-                        render();
-                    } else if (!current_nodes.includes(parseInt(searchTerm))) {
+                        render(data, unode, dnode);
+                    } else if (!current_nodes.includes(searchTerm)) {
                       
-                        render();
+                        // render();
+                        alert('not found')
                         
+                        return
+
                     } else  {
-                        out = return_new_graph(data, parseInt(searchTerm))
+                        
+                        out = return_new_graph(data, searchTerm)
                         data = out[0]
                         unode = out[1]
                         dnode = out[2]
-                        render();  
+                        console.log(unode)
+                        render(data, unode, dnode);  
                     
                     }
               
@@ -298,6 +348,7 @@ document.getElementById('contentFile').onchange = function(evt) {
         };
             
         // const initial_data = data
+        interactive()
         render(data);
 
         }; // reader.onload
@@ -306,6 +357,8 @@ document.getElementById('contentFile').onchange = function(evt) {
         console.error(err);
     }
 }
+
+
 
 
 
